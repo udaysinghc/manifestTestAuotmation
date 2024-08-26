@@ -1,36 +1,40 @@
-pipeline {
-    agent any
+name: Cypress Tests
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/udaysinghc/manifestTestAuotmation.git', branch: 'master'
-            }
-        }
-        stage('Install Dependencies') {
-            steps {
-                script {
-                    bat 'npm install'
-                }
-            }
-        }
-        stage('Run Cypress Tests') {
-            steps {
-                script {
-                    bat 'npx cypress run --browser chrome --headed'
-                }
-            }
-        }
-        stage('Archive Artifacts') {
-            steps {
-                archiveArtifacts artifacts: 'cypress/screenshots/**', allowEmptyArchive: true
-                archiveArtifacts artifacts: 'cypress/videos/**', allowEmptyArchive: true
-            }
-        }
-    }
-    post {
-        always {
-            cleanWs()
-        }
-    }
-}
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  cypress-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14' # Use the version of Node.js you need
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Cypress tests
+        run: npx cypress run --browser chrome --headed
+
+      - name: Upload Cypress screenshots
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+
+      - name: Upload Cypress videos
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-videos
+          path: cypress/videos/
