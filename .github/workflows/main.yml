@@ -1,0 +1,36 @@
+name: Cypress CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  cypress:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16' # Set to the version of Node.js you're using
+
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Run Cypress tests
+      run: npx cypress run
+
+    - name: Upload Cypress screenshots and videos
+      uses: actions/upload-artifact@v3
+      with:
+        name: cypress-artifacts
+        path: |
+          cypress/screenshots
+          cypress/videos
